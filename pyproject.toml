@@ -1,0 +1,32 @@
+[project]
+name = "panther-mcp"
+version = "0.1.0"
+description = "Panther MCP Server — backtest trading strategies from Claude"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+dependencies = [
+    "fastmcp>=2.0",
+    "httpx>=0.28",
+    "pydantic>=2.0",
+]
+
+[project.scripts]
+panther-mcp = "panther_mcp:main"
+panther-mcp-serve = "panther_mcp:serve"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0",
+    "pytest-asyncio>=1.0",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/panther_mcp"]

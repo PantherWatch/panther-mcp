@@ -1,0 +1,17 @@
+{
+  "name": "panther-mcp",
+  "owner": {
+    "name": "PantherWatch",
+    "email": "hello@panther.watch"
+  },
+  "metadata": {
+    "description": "Panther — backtest trading strategies from Claude"
+  },
+  "plugins": [
+    {
+      "name": "panther",
+      "source": "../",
+      "description": "Backtest any trading strategy by describing it to Claude. 30+ assets, 5 indicators, shareable results."
+    }
+  ]
+}

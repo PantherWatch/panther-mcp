@@ -1,0 +1,23 @@
+{
+  "name": "panther",
+  "description": "Backtest any trading strategy by describing it to Claude. 30+ assets (crypto, forex, commodities), 5 indicators, shareable results.",
+  "version": "1.0.0",
+  "author": {
+    "name": "PantherWatch",
+    "email": "hello@panther.watch"
+  },
+  "homepage": "https://panther.watch",
+  "repository": "https://github.com/PantherWatch/panther-mcp",
+  "license": "MIT",
+  "keywords": ["trading", "backtesting", "crypto", "forex", "finance", "mcp"],
+  "category": "external-integrations",
+  "mcpServers": {
+    "panther": {
+      "command": "uvx",
+      "args": ["panther-mcp"],
+      "env": {
+        "PANTHER_API_KEY": "${PANTHER_API_KEY}"
+      }
+    }
+  }
+}
