@@ -186,6 +186,56 @@ STRATEGIES_DOC = """# Panther Strategy Guide
 - Returns upper, middle, lower bands.
 - Example: {"indicator": "BB", "params": {"period": 20, "std": 2.0}}
 
+### VWAP (Volume Weighted Average Price)
+- params: {"period": int}
+- Rolling VWAP based on typical price and volume.
+- Example: {"indicator": "VWAP", "params": {"period": 20}}
+
+### ATR (Average True Range)
+- params: {"period": int}
+- Measures volatility. Useful for dynamic stop losses.
+- Example: {"indicator": "ATR", "params": {"period": 14}}
+
+### STOCH (Stochastic Oscillator)
+- params: {"k_period": int, "d_period": int}
+- Outputs: percent_k (default), percent_d. Values 0-100. Overbought > 80, oversold < 20.
+- Example: {"indicator": "STOCH", "params": {"k_period": 14, "d_period": 3}}
+
+### ADX (Average Directional Index)
+- params: {"period": int}
+- Measures trend strength. Values 0-100. Strong trend > 25.
+- Example: {"indicator": "ADX", "params": {"period": 14}}
+
+### OBV (On Balance Volume)
+- params: {} (no parameters)
+- Cumulative volume flow. Rising OBV confirms uptrend.
+- Example: {"indicator": "OBV", "params": {}}
+
+### SUPERTREND
+- params: {"period": int, "multiplier": float}
+- ATR-based trend indicator. Price above = bullish, below = bearish.
+- Example: {"indicator": "SUPERTREND", "params": {"period": 10, "multiplier": 3.0}}
+
+### ICHIMOKU (Ichimoku Cloud)
+- params: {"tenkan": int, "kijun": int, "senkou": int}
+- Outputs: tenkan_sen (default), kijun_sen, senkou_a, senkou_b.
+- Example: {"indicator": "ICHIMOKU", "params": {"tenkan": 9, "kijun": 26, "senkou": 52}}
+
+### WILLIAMS_R (Williams %R)
+- params: {"period": int}
+- Values -100 to 0. Overbought > -20, oversold < -80.
+- Example: {"indicator": "WILLIAMS_R", "params": {"period": 14}}
+
+### CCI (Commodity Channel Index)
+- params: {"period": int}
+- Overbought > 100, oversold < -100.
+- Example: {"indicator": "CCI", "params": {"period": 20}}
+
+### PSAR (Parabolic SAR)
+- params: {"af_start": float, "af_increment": float, "af_max": float}
+- Trend reversal indicator. Dots above price = bearish, below = bullish.
+- Example: {"indicator": "PSAR", "params": {"af_start": 0.02, "af_increment": 0.02, "af_max": 0.2}}
+
 ## Conditions
 
 - `crosses_above`: Indicator crosses above the comparison value

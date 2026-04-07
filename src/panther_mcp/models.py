@@ -4,12 +4,16 @@ from pydantic import BaseModel, Field
 
 
 class IndicatorRef(BaseModel):
-    indicator: str = Field(description="Indicator name: SMA, EMA, RSI, MACD, BB")
+    indicator: str = Field(
+        description="Indicator name: SMA, EMA, RSI, MACD, BB, VWAP, ATR, STOCH, ADX, OBV, SUPERTREND, ICHIMOKU, WILLIAMS_R, CCI, PSAR"
+    )
     params: dict = Field(description="Indicator parameters, e.g. {'period': 20}")
 
 
 class Rule(BaseModel):
-    indicator: str = Field(description="Indicator name: SMA, EMA, RSI, MACD, BB")
+    indicator: str = Field(
+        description="Indicator name: SMA, EMA, RSI, MACD, BB, VWAP, ATR, STOCH, ADX, OBV, SUPERTREND, ICHIMOKU, WILLIAMS_R, CCI, PSAR"
+    )
     params: dict = Field(description="Indicator parameters, e.g. {'period': 50}")
     condition: str = Field(
         description="Condition: crosses_above, crosses_below, greater_than, less_than, equals"
