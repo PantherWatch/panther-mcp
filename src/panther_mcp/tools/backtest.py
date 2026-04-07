@@ -1,5 +1,5 @@
 from panther_mcp.client import PantherClient
-from panther_mcp.models import Strategy
+from panther_mcp.models import Constraint, ParamRange, Strategy
 
 
 def run_backtest(
@@ -49,3 +49,47 @@ def get_backtest_status(client: PantherClient, backtest_id: str) -> dict:
         backtest_id: The ID returned by run_backtest
     """
     return client.get(f"/backtests/{backtest_id}/status/")
+
+
+def optimize_strategy(
+    client: PantherClient,
+    symbol: str,
+    timeframe: str,
+    start_date: str,
+    strategy: dict,
+    param_ranges: list[dict],
+    constraints: list[dict] | None = None,
+    rank_by: str = "sharpe_ratio",
+    end_date: str | None = None,
+    initial_cash: float = 10000.0,
+    commission: float = 0.001,
+) -> dict:
+    """Submit a strategy optimization / parameter sweep."""
+    parsed = Strategy(**strategy)
+    validated_ranges = [ParamRange(**pr).model_dump() for pr in param_ranges]
+    validated_constraints = (
+        [Constraint(**c).model_dump() for c in constraints] if constraints else []
+    )
+
+    payload = {
+        "symbol": symbol,
+        "timeframe": timeframe,
+        "start_date": start_date,
+        "strategy": parsed.model_dump(exclude_none=True),
+        "param_ranges": validated_ranges,
+        "constraints": validated_constraints,
+        "rank_by": rank_by,
+        "initial_cash": initial_cash,
+        "commission": commission,
+    }
+    if end_date:
+        payload["end_date"] = end_date
+    return client.post("/optimizations/", json=payload)
+
+
+def get_optimization_status(client: PantherClient, optimization_id: str) -> dict:
+    return client.get(f"/optimizations/{optimization_id}/status/")
+
+
+def get_optimization_results(client: PantherClient, optimization_id: str) -> dict:
+    return client.get(f"/optimizations/{optimization_id}/results/")

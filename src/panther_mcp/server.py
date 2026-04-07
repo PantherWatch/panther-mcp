@@ -3,7 +3,13 @@ from fastmcp.server.dependencies import get_access_token
 
 from .auth import PantherTokenVerifier
 from .client import PantherClient
-from .tools.backtest import get_backtest_status, run_backtest
+from .tools.backtest import (
+    get_backtest_status,
+    get_optimization_results,
+    get_optimization_status,
+    optimize_strategy,
+    run_backtest,
+)
 from .tools.data import get_price_data, list_available_assets
 from .tools.results import get_backtest_results, list_backtests
 
@@ -125,6 +131,78 @@ def tool_get_backtest_status(backtest_id: str) -> dict:
     Returns status (queued, running, completed, failed) and progress percentage.
     """
     return get_backtest_status(_get_client(), backtest_id)
+
+
+# --- Optimization tools ---
+
+
+@mcp.tool()
+def tool_optimize_strategy(
+    symbol: str,
+    timeframe: str,
+    start_date: str,
+    strategy: dict,
+    param_ranges: list[dict],
+    constraints: list[dict] | None = None,
+    rank_by: str = "sharpe_ratio",
+    end_date: str | None = None,
+    initial_cash: float = 10000.0,
+    commission: float = 0.001,
+) -> dict:
+    """Run a strategy optimization / parameter sweep.
+
+    Tests multiple parameter combinations and ranks results by a metric.
+
+    param_ranges: List of parameter ranges to sweep. Each has:
+    - rule_path: Path to the parameter, e.g. "entry_rules[0].params.period"
+    - start: Start value (inclusive)
+    - end: End value (inclusive)
+    - step: Step size
+
+    constraints: Optional list of cross-parameter constraints, e.g.
+    [{"left": "entry_rules[0].params.period", "op": "<", "right": "exit_rules[0].params.period"}]
+
+    rank_by: Metric to rank results by (default "sharpe_ratio").
+    Options: total_return, sharpe_ratio, max_drawdown, win_rate, profit_factor, total_trades
+
+    Returns an optimization_id. Use get_optimization_status to poll,
+    then get_optimization_results for ranked results.
+    """
+    return optimize_strategy(
+        _get_client(),
+        symbol=symbol,
+        timeframe=timeframe,
+        start_date=start_date,
+        strategy=strategy,
+        param_ranges=param_ranges,
+        constraints=constraints,
+        rank_by=rank_by,
+        end_date=end_date,
+        initial_cash=initial_cash,
+        commission=commission,
+    )
+
+
+@mcp.tool()
+def tool_get_optimization_status(optimization_id: str) -> dict:
+    """Check the status of a running optimization.
+
+    Returns status, progress percentage, total and completed combinations.
+    """
+    return get_optimization_status(_get_client(), optimization_id)
+
+
+@mcp.tool()
+def tool_get_optimization_results(optimization_id: str) -> dict:
+    """Get the results of a completed optimization.
+
+    Returns:
+    - best: The best parameter combination with its summary metrics
+    - results: All combinations ranked by the chosen metric
+    - total_combinations: How many combinations were tested
+    - rank_by: The metric used for ranking
+    """
+    return get_optimization_results(_get_client(), optimization_id)
 
 
 # --- Results tools ---

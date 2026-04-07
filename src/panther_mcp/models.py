@@ -51,3 +51,18 @@ class Strategy(BaseModel):
     take_profit: float | None = Field(
         default=None, description="Take profit as fraction, e.g. 0.15 for 15%"
     )
+
+
+class ParamRange(BaseModel):
+    rule_path: str = Field(
+        description="Path to the parameter, e.g. 'entry_rules[0].params.period'"
+    )
+    start: float = Field(description="Start value (inclusive)")
+    end: float = Field(description="End value (inclusive)")
+    step: float = Field(description="Step size")
+
+
+class Constraint(BaseModel):
+    left: str = Field(description="Left rule_path")
+    op: Literal["<", ">", "<=", ">="] = Field(description="Comparison operator")
+    right: str = Field(description="Right rule_path")
