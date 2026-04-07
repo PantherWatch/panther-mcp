@@ -236,6 +236,56 @@ STRATEGIES_DOC = """# Panther Strategy Guide
 - Trend reversal indicator. Dots above price = bearish, below = bullish.
 - Example: {"indicator": "PSAR", "params": {"af_start": 0.02, "af_increment": 0.02, "af_max": 0.2}}
 
+### MFI (Money Flow Index)
+- params: {"period": int}
+- Volume-weighted RSI. Values 0-100. Overbought > 80, oversold < 20.
+- Example: {"indicator": "MFI", "params": {"period": 14}}
+
+### ROC (Rate of Change)
+- params: {"period": int}
+- Percentage price change over N periods. Positive = upward momentum.
+- Example: {"indicator": "ROC", "params": {"period": 12}}
+
+### DONCHIAN (Donchian Channels)
+- params: {"period": int}
+- Outputs: upper (default), middle, lower. Highest high / lowest low over N periods.
+- Example: {"indicator": "DONCHIAN", "params": {"period": 20}}
+
+### KELTNER (Keltner Channels)
+- params: {"period": int, "multiplier": float}
+- Outputs: upper (default), middle, lower. EMA +/- ATR * multiplier. Popular for squeeze setups.
+- Example: {"indicator": "KELTNER", "params": {"period": 20, "multiplier": 2.0}}
+
+### STOCH_RSI (Stochastic RSI)
+- params: {"rsi_period": int, "stoch_period": int}
+- Stochastic oscillator applied to RSI. Values 0-100. More sensitive than plain RSI.
+- Example: {"indicator": "STOCH_RSI", "params": {"rsi_period": 14, "stoch_period": 14}}
+
+### CMF (Chaikin Money Flow)
+- params: {"period": int}
+- Measures buying/selling pressure. Values -1 to 1. Positive = buying pressure.
+- Example: {"indicator": "CMF", "params": {"period": 20}}
+
+### TSI (True Strength Index)
+- params: {"long_period": int, "short_period": int}
+- Double-smoothed momentum. Values roughly -100 to 100. Cleaner signals than MACD.
+- Example: {"indicator": "TSI", "params": {"long_period": 25, "short_period": 13}}
+
+### AROON (Aroon Indicator)
+- params: {"period": int}
+- Outputs: aroon_up (default), aroon_down. Measures time since highest/lowest price. Values 0-100.
+- Example: {"indicator": "AROON", "params": {"period": 25}}
+
+### DMI (Directional Movement Index)
+- params: {"period": int}
+- Outputs: plus_di (default), minus_di. Companion to ADX showing trend direction.
+- Example: {"indicator": "DMI", "params": {"period": 14}}
+
+### CONNORS_RSI (Connors RSI)
+- params: {"rsi_period": int, "streak_period": int, "rank_period": int}
+- Composite of RSI + streak RSI + ROC percentile. Popular for mean reversion.
+- Example: {"indicator": "CONNORS_RSI", "params": {"rsi_period": 3, "streak_period": 2, "rank_period": 100}}
+
 ## Conditions
 
 - `crosses_above`: Indicator crosses above the comparison value
