@@ -9,9 +9,9 @@ DEFAULT_BASE_URL = "https://panther.watch/api/v1"
 
 
 class PantherClient:
-    def __init__(self):
+    def __init__(self, api_key: str | None = None):
         self.base_url = os.environ.get("PANTHER_API_URL", DEFAULT_BASE_URL).rstrip("/")
-        self.api_key = get_api_key()
+        self.api_key = api_key or get_api_key()
         self._client = httpx.Client(
             base_url=self.base_url,
             headers={"Authorization": f"Bearer {self.api_key}"},

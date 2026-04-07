@@ -1,5 +1,7 @@
 from fastmcp import FastMCP
+from fastmcp.server.dependencies import get_access_token
 
+from .auth import PantherTokenVerifier
 from .client import PantherClient
 from .tools.backtest import get_backtest_status, run_backtest
 from .tools.data import get_price_data, list_available_assets
@@ -7,6 +9,7 @@ from .tools.results import get_backtest_results, list_backtests
 
 mcp = FastMCP(
     "Panther",
+    auth=PantherTokenVerifier(),
     instructions=(
         "Panther lets you backtest trading strategies. "
         "Start by listing available assets, then examine price data, "
@@ -16,14 +19,22 @@ mcp = FastMCP(
     ),
 )
 
-_client: PantherClient | None = None
+_stdio_client: PantherClient | None = None
 
 
 def _get_client() -> PantherClient:
-    global _client
-    if _client is None:
-        _client = PantherClient()
-    return _client
+    """Get a PantherClient for the current request.
+
+    Hosted (Streamable HTTP): uses the Bearer token from the request.
+    Local (stdio): uses PANTHER_API_KEY env var, cached for the session.
+    """
+    token = get_access_token()
+    if token:
+        return PantherClient(api_key=token.token)
+    global _stdio_client
+    if _stdio_client is None:
+        _stdio_client = PantherClient()
+    return _stdio_client
 
 
 # --- Data tools ---
