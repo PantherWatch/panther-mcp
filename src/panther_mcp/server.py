@@ -86,8 +86,14 @@ def tool_run_backtest(
 
     The strategy object must include:
     - name: Strategy name
-    - entry_rules: List of rules that trigger a buy signal
-    - exit_rules: List of rules that trigger a sell signal
+    - direction (optional): "long" (default), "short", or "both"
+      - "long": entry_rules trigger buys, exit_rules trigger sells
+      - "short": entry_rules trigger short entries, exit_rules trigger short covers
+      - "both": uses entry_rules/exit_rules for longs, plus short_entry_rules/short_exit_rules for shorts
+    - entry_rules: List of rules that trigger entry
+    - exit_rules: List of rules that trigger exit
+    - short_entry_rules (required when direction="both"): Rules for short entries
+    - short_exit_rules (required when direction="both"): Rules for short exits
     - stop_loss (optional): Stop loss as fraction (0.05 = 5%)
     - take_profit (optional): Take profit as fraction (0.15 = 15%)
 
@@ -133,6 +139,9 @@ def tool_get_backtest_results(backtest_id: str) -> dict:
     - trades_preview: First 10 trades with entry/exit dates and P&L
     - full_results_url: Link to full results data
     - results_url: Shareable link to view results on panther.watch
+
+    IMPORTANT: Always share the results_url link with the user so they can view
+    the full results with equity curve and trade details on panther.watch.
     """
     return get_backtest_results(_get_client(), backtest_id)
 
@@ -221,6 +230,48 @@ Can be either:
   ],
   "stop_loss": 0.03,
   "take_profit": 0.10
+}
+```
+
+## Short Selling
+
+Set `"direction": "short"` to short sell. Entry rules trigger short entries, exit rules trigger covers.
+
+### RSI Overbought Short
+```json
+{
+  "name": "RSI Overbought Short",
+  "direction": "short",
+  "entry_rules": [
+    {"indicator": "RSI", "params": {"period": 14}, "condition": "crosses_below", "compare_to": 70}
+  ],
+  "exit_rules": [
+    {"indicator": "RSI", "params": {"period": 14}, "condition": "crosses_below", "compare_to": 30}
+  ],
+  "stop_loss": 0.05
+}
+```
+
+### Long + Short (Both Directions)
+
+Set `"direction": "both"` and provide `short_entry_rules` and `short_exit_rules`:
+```json
+{
+  "name": "RSI Long Short",
+  "direction": "both",
+  "entry_rules": [
+    {"indicator": "RSI", "params": {"period": 14}, "condition": "crosses_above", "compare_to": 30}
+  ],
+  "exit_rules": [
+    {"indicator": "RSI", "params": {"period": 14}, "condition": "crosses_above", "compare_to": 50}
+  ],
+  "short_entry_rules": [
+    {"indicator": "RSI", "params": {"period": 14}, "condition": "crosses_below", "compare_to": 70}
+  ],
+  "short_exit_rules": [
+    {"indicator": "RSI", "params": {"period": 14}, "condition": "crosses_below", "compare_to": 50}
+  ],
+  "stop_loss": 0.03
 }
 ```
 """

@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -19,8 +21,26 @@ class Rule(BaseModel):
 
 class Strategy(BaseModel):
     name: str = Field(description="Human-readable strategy name")
-    entry_rules: list[Rule] = Field(description="Rules that trigger entry (buy)")
-    exit_rules: list[Rule] = Field(description="Rules that trigger exit (sell)")
+    direction: Literal["long", "short", "both"] = Field(
+        default="long",
+        description="Trade direction: 'long' (default), 'short', or 'both'. "
+        "For 'short', entry_rules trigger short entries and exit_rules trigger short covers. "
+        "For 'both', also provide short_entry_rules and short_exit_rules.",
+    )
+    entry_rules: list[Rule] = Field(
+        description="Rules that trigger entry (buy for long, short entry when direction='short')"
+    )
+    exit_rules: list[Rule] = Field(
+        description="Rules that trigger exit (sell for long, short cover when direction='short')"
+    )
+    short_entry_rules: list[Rule] | None = Field(
+        default=None,
+        description="Rules that trigger short entry (only when direction='both')",
+    )
+    short_exit_rules: list[Rule] | None = Field(
+        default=None,
+        description="Rules that trigger short exit / cover (only when direction='both')",
+    )
     stop_loss: float | None = Field(
         default=None, description="Stop loss as fraction, e.g. 0.05 for 5%"
     )

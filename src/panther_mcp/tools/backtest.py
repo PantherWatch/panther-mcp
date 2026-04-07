@@ -33,7 +33,7 @@ def run_backtest(
         "symbol": symbol,
         "timeframe": timeframe,
         "start_date": start_date,
-        "strategy": parsed.model_dump(),
+        "strategy": parsed.model_dump(exclude_none=True),
         "initial_cash": initial_cash,
         "commission": commission,
     }
