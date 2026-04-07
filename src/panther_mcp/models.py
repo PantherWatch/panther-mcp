@@ -64,5 +64,7 @@ class ParamRange(BaseModel):
 
 class Constraint(BaseModel):
     left: str = Field(description="Left rule_path")
-    op: Literal["<", ">", "<=", ">=", "=", "=="] = Field(description="Comparison operator")
+    op: Literal["<", ">", "<=", ">=", "=", "=="] = Field(
+        description="Comparison operator"
+    )
     right: str = Field(description="Right rule_path")
