@@ -13,7 +13,7 @@ from .tools.backtest import (
     run_backtest,
 )
 from .tools.data import get_price_data, list_available_assets
-from .tools.results import get_backtest_results, list_backtests
+from .tools.results import get_backtest_results, list_backtests, list_optimizations
 
 mcp = FastMCP(
     "Panther",
@@ -236,6 +236,18 @@ def tool_list_backtests(
     Use this to review past experiments and compare strategies.
     """
     return list_backtests(_get_client(), limit=limit, symbol=symbol)
+
+
+@mcp.tool()
+def tool_list_optimizations(
+    limit: int = 10,
+    symbol: str | None = None,
+) -> dict:
+    """List your previous optimizations / parameter sweeps.
+
+    Use this to review past optimization runs and their best parameters.
+    """
+    return list_optimizations(_get_client(), limit=limit, symbol=symbol)
 
 
 # --- Resources (documentation for Claude) ---

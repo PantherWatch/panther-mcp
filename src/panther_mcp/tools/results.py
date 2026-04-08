@@ -29,3 +29,21 @@ def list_backtests(
         params["symbol"] = symbol
     backtests = client.get("/backtests/", params=params)
     return {"backtests": backtests, "total": len(backtests)}
+
+
+def list_optimizations(
+    client: PantherClient,
+    limit: int = 10,
+    symbol: str | None = None,
+) -> dict:
+    """List your previous optimizations with summary info.
+
+    Args:
+        limit: Maximum number of results (default 10)
+        symbol: Filter by asset symbol
+    """
+    params = {"limit": limit}
+    if symbol:
+        params["symbol"] = symbol
+    optimizations = client.get("/optimizations/", params=params)
+    return {"optimizations": optimizations, "total": len(optimizations)}
