@@ -23,9 +23,9 @@ class TestServerSetup:
 
 class TestTools:
     @pytest.mark.asyncio
-    async def test_ten_tools_registered(self):
+    async def test_thirteen_tools_registered(self):
         tools = await mcp.list_tools()
-        assert len(tools) == 10
+        assert len(tools) == 13
 
     @pytest.mark.asyncio
     async def test_tool_names(self):
@@ -42,6 +42,9 @@ class TestTools:
             "tool_get_optimization_status",
             "tool_get_optimization_results",
             "tool_list_optimizations",
+            "tool_run_portfolio_backtest",
+            "tool_get_portfolio_backtest_status",
+            "tool_get_portfolio_backtest_results",
         }
 
     @pytest.mark.asyncio

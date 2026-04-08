@@ -1,5 +1,5 @@
 from panther_mcp.client import PantherClient
-from panther_mcp.models import Constraint, ParamRange, Strategy
+from panther_mcp.models import Constraint, ParamRange, PortfolioAsset, Strategy
 
 
 def run_backtest(
@@ -93,3 +93,52 @@ def get_optimization_status(client: PantherClient, optimization_id: str) -> dict
 
 def get_optimization_results(client: PantherClient, optimization_id: str) -> dict:
     return client.get(f"/optimizations/{optimization_id}/results/")
+
+
+def run_portfolio_backtest(
+    client: PantherClient,
+    assets: list[dict],
+    timeframe: str,
+    start_date: str,
+    strategy: dict,
+    end_date: str | None = None,
+    initial_cash: float = 10000.0,
+    commission: float = 0.001,
+) -> dict:
+    """Submit a portfolio backtest across multiple assets.
+
+    Args:
+        assets: List of {"symbol": "BTC/USDT", "weight": 0.6} dicts. Weights must sum to 1.0.
+        timeframe: Candle timeframe
+        start_date: Start date in ISO format
+        strategy: Strategy definition (applied to all assets)
+        end_date: End date (defaults to today)
+        initial_cash: Total starting capital (default 10000)
+        commission: Per-trade commission rate (default 0.001)
+    """
+    parsed_strategy = Strategy(**strategy)
+    validated_assets = [PortfolioAsset(**a).model_dump() for a in assets]
+
+    payload = {
+        "assets": validated_assets,
+        "timeframe": timeframe,
+        "start_date": start_date,
+        "strategy": parsed_strategy.model_dump(exclude_none=True),
+        "initial_cash": initial_cash,
+        "commission": commission,
+    }
+    if end_date:
+        payload["end_date"] = end_date
+    return client.post("/portfolios/", json=payload)
+
+
+def get_portfolio_backtest_status(
+    client: PantherClient, portfolio_backtest_id: str
+) -> dict:
+    return client.get(f"/portfolios/{portfolio_backtest_id}/status/")
+
+
+def get_portfolio_backtest_results(
+    client: PantherClient, portfolio_backtest_id: str
+) -> dict:
+    return client.get(f"/portfolios/{portfolio_backtest_id}/results/")

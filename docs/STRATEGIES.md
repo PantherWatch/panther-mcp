@@ -137,6 +137,82 @@
 Can be either:
 - Another indicator: {"indicator": "SMA", "params": {"period": 200}}
 - A numeric value: 70 (e.g., RSI > 70)
+- A formula (see Formulas section below)
+
+## Formulas
+
+Rules can use **formulas** to combine indicators, price fields, and constants with arithmetic. Use `"formula"` instead of `"indicator"`/`"params"` on a rule.
+
+### Formula Node Types
+
+| Node | Shape | Returns |
+|------|-------|---------|
+| Indicator | `{"indicator": "SMA", "params": {"period": 20}}` | Indicator series |
+| Constant | `{"value": 0.5}` | Numeric constant |
+| Price | `{"price": "close"}` | OHLCV column (open, high, low, close, volume) |
+| Binary op | `{"op": "+", "left": <node>, "right": <node>}` | Arithmetic (+, -, *, /) |
+| Unary op | `{"op": "abs", "operand": <node>}` | abs or negate |
+
+Formulas are recursive — any node can contain other nodes.
+
+### Formula Examples
+
+#### Price Relative Strength (close / SMA > 1.05)
+```json
+{
+  "formula": {"op": "/", "left": {"price": "close"}, "right": {"indicator": "SMA", "params": {"period": 200}}},
+  "condition": "greater_than",
+  "compare_to": 1.05
+}
+```
+
+#### Composite Oversold ((RSI + StochRSI) / 2 < 30)
+```json
+{
+  "formula": {
+    "op": "/",
+    "left": {
+      "op": "+",
+      "left": {"indicator": "RSI", "params": {"period": 14}},
+      "right": {"indicator": "STOCH_RSI", "params": {"rsi_period": 14, "stoch_period": 14}}
+    },
+    "right": {"value": 2}
+  },
+  "condition": "less_than",
+  "compare_to": 30
+}
+```
+
+#### ATR Volatility Expansion (ATR(14) > ATR(28) * 1.5)
+```json
+{
+  "indicator": "ATR",
+  "params": {"period": 14},
+  "condition": "greater_than",
+  "compare_to": {"op": "*", "left": {"indicator": "ATR", "params": {"period": 28}}, "right": {"value": 1.5}}
+}
+```
+
+#### Bollinger %B ((close - BB_lower) / (BB_upper - BB_lower) < 0.2)
+```json
+{
+  "formula": {
+    "op": "/",
+    "left": {"op": "-", "left": {"price": "close"}, "right": {"indicator": "BB", "params": {"period": 20, "std": 2.0, "output": "lower"}}},
+    "right": {"op": "-", "left": {"indicator": "BB", "params": {"period": 20, "std": 2.0, "output": "upper"}}, "right": {"indicator": "BB", "params": {"period": 20, "std": 2.0, "output": "lower"}}}
+  },
+  "condition": "less_than",
+  "compare_to": 0.2
+}
+```
+
+### Notes
+- Most strategies don't need formulas — use them only when you need arithmetic on indicators
+- Division by zero produces NaN, which is treated as "no signal" (safe default)
+- Maximum nesting depth: 10 levels
+- Formulas work in both `"formula"` (left side) and `"compare_to"` (right side)
+- Formulas can be mixed with plain indicator rules in the same strategy
+- Formula indicator params are optimizable via `rule_path` (e.g., `entry_rules[0].formula.right.params.period`)
 
 ## Example Strategies
 
@@ -212,4 +288,33 @@ Set `"direction": "both"` and provide `short_entry_rules` and `short_exit_rules`
   "stop_loss": 0.03
 }
 ```
+
+## Portfolio Backtesting
+
+Test a strategy across multiple assets with weighted capital allocation using `run_portfolio_backtest`.
+
+### Two-Asset Portfolio
+```json
+{
+  "assets": [
+    {"symbol": "BTC/USDT", "weight": 0.6},
+    {"symbol": "ETH/USDT", "weight": 0.4}
+  ],
+  "strategy": {
+    "name": "RSI Portfolio",
+    "entry_rules": [
+      {"indicator": "RSI", "params": {"period": 14}, "condition": "less_than", "compare_to": 30}
+    ],
+    "exit_rules": [
+      {"indicator": "RSI", "params": {"period": 14}, "condition": "greater_than", "compare_to": 70}
+    ]
+  }
+}
+```
+
+- Weights must sum to 1.0
+- Minimum 2 assets, maximum 20
+- Same strategy is applied to all assets
+- Returns portfolio-level metrics (combined Sharpe, drawdown) plus per-asset breakdowns
+- All trades tagged with which asset they belong to
 

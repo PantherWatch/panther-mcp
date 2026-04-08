@@ -27,8 +27,10 @@ def list_backtests(
     params = {"limit": limit}
     if symbol:
         params["symbol"] = symbol
-    backtests = client.get("/backtests/", params=params)
-    return {"backtests": backtests, "total": len(backtests)}
+    response = client.get("/backtests/", params=params)
+    if isinstance(response, list):
+        return {"backtests": response, "total": len(response)}
+    return {"backtests": response["results"], "total": response["total"]}
 
 
 def list_optimizations(
@@ -45,5 +47,7 @@ def list_optimizations(
     params = {"limit": limit}
     if symbol:
         params["symbol"] = symbol
-    optimizations = client.get("/optimizations/", params=params)
-    return {"optimizations": optimizations, "total": len(optimizations)}
+    response = client.get("/optimizations/", params=params)
+    if isinstance(response, list):
+        return {"optimizations": response, "total": len(response)}
+    return {"optimizations": response["results"], "total": response["total"]}

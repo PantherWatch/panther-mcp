@@ -1,6 +1,8 @@
-from typing import Literal
+from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from typing import Literal, Union
+
+from pydantic import BaseModel, Field, model_validator
 
 
 class IndicatorRef(BaseModel):
@@ -10,17 +12,63 @@ class IndicatorRef(BaseModel):
     params: dict = Field(description="Indicator parameters, e.g. {'period': 20}")
 
 
-class Rule(BaseModel):
-    indicator: str = Field(
-        description="Indicator name: SMA, EMA, RSI, MACD, BB, VWAP, ATR, STOCH, ADX, OBV, SUPERTREND, ICHIMOKU, WILLIAMS_R, CCI, PSAR, MFI, ROC, DONCHIAN, KELTNER, STOCH_RSI, CMF, TSI, AROON, DMI, CONNORS_RSI"
+# --- Formula node types ---
+
+
+class ConstantNode(BaseModel):
+    value: float = Field(description="Numeric constant, e.g. 0.5 or 1.05")
+
+
+class PriceNode(BaseModel):
+    price: Literal["open", "high", "low", "close", "volume"] = Field(
+        description="Price field to use from OHLCV data"
     )
-    params: dict = Field(description="Indicator parameters, e.g. {'period': 50}")
+
+
+class BinaryOpNode(BaseModel):
+    op: Literal["+", "-", "*", "/"] = Field(description="Arithmetic operator")
+    left: FormulaNode = Field(description="Left operand")
+    right: FormulaNode = Field(description="Right operand")
+
+
+class UnaryOpNode(BaseModel):
+    op: Literal["abs", "negate"] = Field(description="Unary operator")
+    operand: FormulaNode = Field(description="Operand")
+
+
+FormulaNode = Union[IndicatorRef, ConstantNode, PriceNode, BinaryOpNode, UnaryOpNode]
+BinaryOpNode.model_rebuild()
+UnaryOpNode.model_rebuild()
+
+
+class Rule(BaseModel):
+    indicator: str | None = Field(
+        default=None,
+        description="Indicator name (use this OR formula, not both): SMA, EMA, RSI, MACD, BB, VWAP, ATR, STOCH, ADX, OBV, SUPERTREND, ICHIMOKU, WILLIAMS_R, CCI, PSAR, MFI, ROC, DONCHIAN, KELTNER, STOCH_RSI, CMF, TSI, AROON, DMI, CONNORS_RSI",
+    )
+    params: dict | None = Field(
+        default=None, description="Indicator parameters, e.g. {'period': 50}"
+    )
+    formula: FormulaNode | None = Field(
+        default=None,
+        description="Formula expression tree for combining indicators/price/constants with arithmetic. Use this OR indicator/params, not both. Example: {'op': '/', 'left': {'price': 'close'}, 'right': {'indicator': 'SMA', 'params': {'period': 200}}}",
+    )
     condition: str = Field(
         description="Condition: crosses_above, crosses_below, greater_than, less_than, equals"
     )
-    compare_to: IndicatorRef | float = Field(
-        description="Compare to another indicator (e.g. {'indicator': 'SMA', 'params': {'period': 200}}) or a numeric value (e.g. 70)"
+    compare_to: IndicatorRef | FormulaNode | float = Field(
+        description="Compare to an indicator, a formula, or a numeric value"
     )
+
+    @model_validator(mode="after")
+    def check_indicator_or_formula(self):
+        if self.indicator and self.formula:
+            raise ValueError("Cannot specify both 'indicator' and 'formula'")
+        if not self.indicator and not self.formula:
+            raise ValueError("Must specify either 'indicator' or 'formula'")
+        if self.indicator and self.params is None:
+            raise ValueError("'params' required when using 'indicator'")
+        return self
 
 
 class Strategy(BaseModel):
@@ -68,3 +116,12 @@ class Constraint(BaseModel):
         description="Comparison operator"
     )
     right: str = Field(description="Right rule_path")
+
+
+class PortfolioAsset(BaseModel):
+    symbol: str = Field(description="Asset symbol, e.g. 'BTC/USDT', 'ETH/USDT'")
+    weight: float = Field(
+        description="Portfolio weight (0-1). All weights must sum to 1.0",
+        gt=0,
+        le=1,
+    )

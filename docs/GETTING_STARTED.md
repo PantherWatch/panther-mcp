@@ -8,7 +8,9 @@
 4. **Run backtest** — Use `run_backtest` to execute your strategy
 5. **Check status** — Use `get_backtest_status` to poll until completed
 6. **Review results** — Use `get_backtest_results` for metrics and a link to full results
-7. **Iterate** — Adjust parameters, try different indicators, compare results
+7. **Optimize** — Use `optimize_strategy` to sweep parameters and find the best config
+8. **Portfolio test** — Use `run_portfolio_backtest` to test across multiple weighted assets
+9. **Iterate** — Adjust parameters, try different indicators, compare results
 
 ## Tips
 
@@ -16,4 +18,6 @@
 - Compare strategies across different timeframes and date ranges
 - Use stop_loss and take_profit to manage risk
 - Check the full results on panther.watch for equity curves and trade details
+- Use portfolio backtesting to test diversification — compare a 60/40 BTC/ETH portfolio vs BTC alone
+- Mix asset types (crypto + forex) in portfolios for uncorrelated returns
 

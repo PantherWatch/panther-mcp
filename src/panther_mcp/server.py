@@ -9,8 +9,11 @@ from .tools.backtest import (
     get_backtest_status,
     get_optimization_results,
     get_optimization_status,
+    get_portfolio_backtest_results,
+    get_portfolio_backtest_status,
     optimize_strategy,
     run_backtest,
+    run_portfolio_backtest,
 )
 from .tools.data import get_price_data, list_available_assets
 from .tools.results import get_backtest_results, list_backtests, list_optimizations
@@ -248,6 +251,70 @@ def tool_list_optimizations(
     Use this to review past optimization runs and their best parameters.
     """
     return list_optimizations(_get_client(), limit=limit, symbol=symbol)
+
+
+# --- Portfolio Backtest tools ---
+
+
+@mcp.tool()
+def tool_run_portfolio_backtest(
+    assets: list[dict],
+    timeframe: str,
+    start_date: str,
+    strategy: dict,
+    end_date: str | None = None,
+    initial_cash: float = 10000.0,
+    commission: float = 0.001,
+) -> dict:
+    """Run a portfolio backtest across multiple assets with weighted allocation.
+
+    Test how a strategy performs across a diversified portfolio. Each asset gets
+    a weighted allocation of the total capital.
+
+    assets: List of asset allocations. Each has:
+    - symbol: Asset symbol (e.g. "BTC/USDT", "ETH/USDT")
+    - weight: Portfolio weight from 0 to 1. All weights must sum to 1.0.
+
+    Example: [{"symbol": "BTC/USDT", "weight": 0.6}, {"symbol": "ETH/USDT", "weight": 0.4}]
+
+    The same strategy is applied to all assets. Returns a portfolio_backtest_id.
+    Use get_portfolio_backtest_status to poll, then get_portfolio_backtest_results for results.
+    """
+    return run_portfolio_backtest(
+        _get_client(),
+        assets=assets,
+        timeframe=timeframe,
+        start_date=start_date,
+        strategy=strategy,
+        end_date=end_date,
+        initial_cash=initial_cash,
+        commission=commission,
+    )
+
+
+@mcp.tool()
+def tool_get_portfolio_backtest_status(portfolio_backtest_id: str) -> dict:
+    """Check the status of a running portfolio backtest.
+
+    Returns status (queued, running, completed, failed) and progress percentage.
+    """
+    return get_portfolio_backtest_status(_get_client(), portfolio_backtest_id)
+
+
+@mcp.tool()
+def tool_get_portfolio_backtest_results(portfolio_backtest_id: str) -> dict:
+    """Get the results of a completed portfolio backtest.
+
+    Returns:
+    - summary: Portfolio-level metrics (total return, Sharpe ratio, max drawdown, total trades)
+    - per_asset_results: Performance breakdown per asset
+    - trades_preview: Recent trades across all assets
+    - results_url: Shareable link to view results on panther.watch
+
+    IMPORTANT: Always share the results_url link with the user so they can view
+    the full results with equity curve, per-asset breakdown, and trade details on panther.watch.
+    """
+    return get_portfolio_backtest_results(_get_client(), portfolio_backtest_id)
 
 
 # --- Resources (documentation for Claude) ---

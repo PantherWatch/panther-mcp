@@ -68,6 +68,13 @@ You'll get results including return, Sharpe ratio, drawdown, every trade, and a 
 | `get_backtest_status` | Poll running backtest status + progress |
 | `get_backtest_results` | Get performance metrics + shareable panther.watch link |
 | `list_backtests` | View your backtest history |
+| `optimize_strategy` | Run parameter sweeps across combinations |
+| `get_optimization_status` | Poll optimization progress |
+| `get_optimization_results` | Get ranked parameter results |
+| `list_optimizations` | View optimization history |
+| `run_portfolio_backtest` | Test a strategy across multiple weighted assets |
+| `get_portfolio_backtest_status` | Poll portfolio backtest progress |
+| `get_portfolio_backtest_results` | Get portfolio + per-asset results |
 
 ## Supported Assets
 
@@ -77,13 +84,12 @@ You'll get results including return, Sharpe ratio, drawdown, every trade, and a 
 | Forex | IC Markets (cTrader) | EUR/USD, GBP/USD, USD/JPY + 7 more |
 | Commodities | IC Markets (cTrader) | XAU/USD (Gold), XAG/USD (Silver) |
 
-## Supported Indicators
+## Features
 
-- **SMA** — Simple Moving Average
-- **EMA** — Exponential Moving Average
-- **RSI** — Relative Strength Index (0-100)
-- **MACD** — Moving Average Convergence Divergence (line, signal, histogram)
-- **BB** — Bollinger Bands (upper, middle, lower)
+- **25 indicators** — SMA, EMA, RSI, MACD, BB, VWAP, ATR, Stochastic, ADX, OBV, Supertrend, Ichimoku, and 13 more
+- **Short selling** — Long, short, or bidirectional strategies
+- **Strategy optimization** — Parameter sweeps with constraints and ranking by any metric
+- **Portfolio backtesting** — Test across multiple weighted assets with portfolio-level metrics
 
 ## Example Strategies
 
@@ -96,8 +102,11 @@ You'll get results including return, Sharpe ratio, drawdown, every trade, and a 
 **MACD Crossover:**
 > "Enter when MACD line crosses above signal line, exit on reverse, on ETH/USDT daily"
 
-**Bollinger Band Bounce:**
-> "Buy when price crosses above lower Bollinger Band, sell at upper band on gold daily"
+**Portfolio:**
+> "Backtest RSI strategy on a portfolio of 60% BTC and 40% ETH over 2024"
+
+**Optimization:**
+> "Optimize the SMA crossover on BTC — try fast period 10-50 step 10, slow period 50-200 step 50"
 
 ## Shareable Results
 
